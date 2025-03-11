@@ -93,7 +93,10 @@ For the signed URLs to be properly validated, you need to configure WAF custom r
 
 1. Go to your Cloudflare dashboard
 2. Navigate to Security > WAF > Custom rules
-3. Create a new custom rule with settings similar to, keep in mind that the last parameter here "11" is the lenght of "?accesskey=":
+3. Create a new custom rule with settings similar to the one below:
+   - The time limit is set to 300 seconds
+   - Here the example SIGNING_KEY is my-secret-key
+   - The last parameter, here "11", is the lenght of "?accesskey="
 
 ```
 IF
@@ -101,8 +104,6 @@ IF
 THEN
   Block
 ```
-
-Replace `{SIGNATURE_TIMESTAMP}` and `{EXPIRATION_TIME}` with appropriate values, and implement the `expected_hmac` logic according to your security requirements.
 
 ## Cache Rules for Query String Parameters
 
@@ -116,7 +117,7 @@ Reference: [Cloudflare Cache Keys Documentation](https://developers.cloudflare.c
 2. Navigate to Caching > Configuration
 3. Scroll to "Cache Key Settings"
 4. Under "Query String", select "Ignore specified parameters"
-5. Add your authentication parameters (e.g., "verify") to the list of ignored parameters
+5. Add your authentication parameters (e.g., "accesskey") to the list of ignored parameters
 
 This configuration ensures that files are cached based on their core URL, ignoring the authentication tokens which change for each user or session.
 
