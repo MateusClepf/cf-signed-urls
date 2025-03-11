@@ -1,5 +1,4 @@
-Files are stored in a R2 bucket with a bind to the Pages applciation
-https://developers.cloudflare.com/pages/tutorials/use-r2-as-static-asset-storage-for-pages/
+
 
 # Signed URL Demo Project
 
@@ -11,6 +10,9 @@ This project consists of two main components:
 
 1. **Request Signing Worker** - A Cloudflare Worker that signs requests using HMAC authentication
 2. **Signed URL Demo Page** - A Cloudflare Pages application that demonstrates requesting and using signed URLs
+3. **WAF for HMAC validation**
+4. **Cache Rules for Query String Parameters**
+
 
 ## Request Signing Worker
 
@@ -69,6 +71,7 @@ A demonstration web page that shows how to request, validate, and use signed URL
 - Embedded PDF viewer with signed URL authentication
 - Cache status display for debugging and verification
 - Copy functionality for sharing URLs
+- Files are stored in a R2 bucket with a bind to the Pages application as described in [Cloudflare documentation](https://developers.cloudflare.com/pages/tutorials/use-r2-as-static-asset-storage-for-pages/).
 
 ### Deployment Instructions
 
