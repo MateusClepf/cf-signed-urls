@@ -116,18 +116,32 @@
         urlStatusMessage.innerHTML = 'Requesting signed URL...';
         urlStatusMessage.className = 'status';
         
-        const response = await fetch('https://signedurl.whereismypacket.net/signedurl/generate/mypdf.pdf');
+        const response = await fetch('https://www.whereismypacket.net/signedurl/generate/mypdf.pdf');
         
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         
         const text = await response.text();
-        signedUrlParam = text.trim();
+        const fullPath = text.trim();
         
-        // Display the signed URL
+        // Extract just the query string part
+        // The response is like "/mypdf?verify=1741634933-EH9GXTiZ2Fg6UQFGl9tPrbazUm1ZZ66qkUhjOlliacs"
+        // We need to extract just the "?verify=..." part
+        const queryStringIndex = fullPath.indexOf('?');
+        if (queryStringIndex !== -1) {
+          signedUrlParam = fullPath.substring(queryStringIndex);
+        } else {
+          // If there's no question mark, use the whole string (shouldn't happen based on your example)
+          signedUrlParam = fullPath;
+        }
+        
+        // Display both the full response and the extracted query parameter
         signedUrlElement.style.display = 'block';
-        signedUrlElement.textContent = signedUrlParam;
+        signedUrlElement.innerHTML = `
+          <div><strong>Full response:</strong> ${fullPath}</div>
+          <div><strong>Extracted query:</strong> ${signedUrlParam}</div>
+        `;
         
         // Enable the download button
         downloadBtn.disabled = false;
@@ -154,7 +168,7 @@
           return;
         }
         
-        // Construct the full URL
+        // Construct the full URL - now using just the query parameter portion
         const fileUrl = `https://www.whereismypacket.net/signedurl/files/mypdf.pdf${signedUrlParam}`;
         
         downloadStatusMessage.innerHTML = 'Downloading file...';
