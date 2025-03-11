@@ -4,6 +4,8 @@
 
 This project demonstrates using Cloudflare Workers and Pages to create and validate signed URLs with HMAC authentication. The solution provides a secure way to authenticate requests for protected resources while allowing effective caching.
 
+This demo is publicly available at https://signedurl.whereismypacket.net/ for testing.
+
 ## Project Components
 
 This project consists of two main components:
