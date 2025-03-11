@@ -1,5 +1,5 @@
 name = "simple-test-page"
-pages_build_output_dir = "./dist"
+pages_build_output_dir = "./"
 
 
 [[r2_buckets]]
