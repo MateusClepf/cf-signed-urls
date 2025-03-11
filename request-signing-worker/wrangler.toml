@@ -5,3 +5,7 @@ compatibility_date = "2024-03-10"
 route = { pattern = "signedurl.whereismypacket.net/signedurl/generate/*", zone_name = "whereismypacket.net" }
 
 compatibility_flags = ["nodejs_compat_v2"]
+
+# wrangler.toml (wrangler v3.88.0^)
+[observability.logs]
+enabled = true

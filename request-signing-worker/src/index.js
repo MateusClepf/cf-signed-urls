@@ -44,7 +44,7 @@ export default {
     // In a real application you would want to make sure that
     // users could only generate signed URLs when authenticated
     if (url.pathname.startsWith("/signedurl/generate/")) {
-      url.pathname = url.pathname.replace("/signedurl/generate/", "/");
+      url.pathname = url.pathname.replace("/signedurl/generate/", "/signedurl/files/");
 
       const timestamp = Math.floor(Date.now() / 1000);
 
@@ -63,7 +63,8 @@ export default {
       // for more details on using Node.js APIs in Workers
       const base64Mac = Buffer.from(mac).toString("base64");
 
-      url.searchParams.set("verify", `${timestamp}-${base64Mac}`);
+      url.searchParams.set("accesskey", `${timestamp}-${base64Mac}`);
+      console.log("Response:", `${url.pathname}${url.search}`)
 
       return new Response(`${url.pathname}${url.search}`);
       // Verify all non /generate requests

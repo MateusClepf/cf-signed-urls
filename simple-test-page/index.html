@@ -1,3 +1,7 @@
+       
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +11,7 @@
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      max-width: 800px;
+      max-width: 1000px;
       margin: 0 auto;
       padding: 20px;
       line-height: 1.6;
@@ -73,6 +77,48 @@
       background-color: #f8d7da;
       color: #721c24;
     }
+    .info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+    }
+    #pdfViewer {
+      display: none;
+      width: 100%;
+      height: 600px;
+      margin-top: 20px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    #cacheInfo {
+      margin-top: 20px;
+      background-color: #e2e3e5;
+      color: #383d41;
+      padding: 10px;
+      border-radius: 4px;
+      display: none;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .copy-button {
+      background-color: #6c757d;
+      font-size: 12px;
+      padding: 3px 8px;
+      margin-left: 5px;
+    }
+    .copy-button:hover {
+      background-color: #5a6268;
+    }
   </style>
 </head>
 <body>
@@ -89,21 +135,27 @@
     </div>
     
     <div class="step">
-      <h2>Step 2: Download the File</h2>
-      <p>Click the button below to download the PDF file using the signed URL.</p>
+      <h2>Step 2: View the PDF</h2>
+      <p>Click the button below to view the PDF file using the signed URL.</p>
+      <button id="viewPdfBtn" disabled>View PDF</button>
       <button id="downloadBtn" disabled>Download PDF</button>
       <div id="downloadStatusMessage" class="status"></div>
+      <div id="cacheInfo"></div>
+      <iframe id="pdfViewer" title="PDF Viewer"></iframe>
     </div>
   </div>
 
   <script>
     // DOM elements
     const getSignedUrlBtn = document.getElementById('getSignedUrlBtn');
+    const viewPdfBtn = document.getElementById('viewPdfBtn');
     const downloadBtn = document.getElementById('downloadBtn');
     const signedUrlElement = document.getElementById('signedUrl');
     const countdownElement = document.getElementById('countdown');
     const urlStatusMessage = document.getElementById('urlStatusMessage');
     const downloadStatusMessage = document.getElementById('downloadStatusMessage');
+    const pdfViewer = document.getElementById('pdfViewer');
+    const cacheInfo = document.getElementById('cacheInfo');
     
     // Variables
     let signedUrlParam = '';
@@ -126,8 +178,6 @@
         const fullPath = text.trim();
         
         // Extract just the query string part
-        // The response is like "/mypdf?verify=1741634933-EH9GXTiZ2Fg6UQFGl9tPrbazUm1ZZ66qkUhjOlliacs"
-        // We need to extract just the "?verify=..." part
         const queryStringIndex = fullPath.indexOf('?');
         if (queryStringIndex !== -1) {
           signedUrlParam = fullPath.substring(queryStringIndex);
@@ -143,8 +193,9 @@
           <div><strong>Extracted query:</strong> ${signedUrlParam}</div>
         `;
         
-        // Enable the download button
+        // Enable the download and view buttons
         downloadBtn.disabled = false;
+        viewPdfBtn.disabled = false;
         
         // Start the countdown (5 minutes = 300 seconds)
         startCountdown(300);
@@ -186,6 +237,124 @@
       }
     }
     
+    // Function to view PDF and show cache info
+    async function viewPdf() {
+      try {
+        // Check if we have a signed URL
+        if (!signedUrlParam) {
+          downloadStatusMessage.innerHTML = 'Error: No signed URL available. Please get a signed URL first.';
+          downloadStatusMessage.className = 'status error';
+          return;
+        }
+        
+        // Construct the full URL
+        const fileUrl = `https://www.whereismypacket.net/signedurl/files/mypdf.pdf${signedUrlParam}`;
+        
+        downloadStatusMessage.innerHTML = 'Loading PDF...';
+        downloadStatusMessage.className = 'status info';
+        
+        // Fetch the file to get headers
+        const response = await fetch(fileUrl, {
+          method: 'GET',
+          cache: 'no-store' // To ensure we get fresh cache headers
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        // Display the PDF in the iframe
+        pdfViewer.style.display = 'block';
+        pdfViewer.src = fileUrl;
+        
+        // Get cache-related headers
+        const headers = response.headers;
+        const cacheControl = headers.get('cache-control') || 'Not specified';
+        const etag = headers.get('etag') || 'Not specified';
+        const lastModified = headers.get('last-modified') || 'Not specified';
+        const cfCache = headers.get('cf-cache-status') || 'Not specified';
+        const age = headers.get('age') || 'Not specified';
+        const contentType = headers.get('content-type') || 'Not specified';
+        
+        // Display cache information
+        cacheInfo.style.display = 'block';
+        cacheInfo.innerHTML = `
+          <h3>Cache and Response Information</h3>
+          <table>
+            <tr>
+              <th>Header</th>
+              <th>Value</th>
+            </tr>
+            <tr>
+              <td>CF-Cache-Status</td>
+              <td>${cfCache} ${getStatusInfo(cfCache)}</td>
+            </tr>
+            <tr>
+              <td>Cache-Control</td>
+              <td>${cacheControl}</td>
+            </tr>
+            <tr>
+              <td>ETag</td>
+              <td>${etag}</td>
+            </tr>
+            <tr>
+              <td>Last-Modified</td>
+              <td>${lastModified}</td>
+            </tr>
+            <tr>
+              <td>Age</td>
+              <td>${age}</td>
+            </tr>
+            <tr>
+              <td>Content-Type</td>
+              <td>${contentType}</td>
+            </tr>
+          </table>
+          <p><strong>Request URL:</strong> <span id="requestUrl">${fileUrl}</span> <button class="copy-button" onclick="copyToClipboard('requestUrl')">Copy</button></p>
+          <p><strong>Response Status:</strong> ${response.status} ${response.statusText}</p>
+        `;
+        
+        downloadStatusMessage.innerHTML = 'PDF loaded successfully!';
+        downloadStatusMessage.className = 'status success';
+      } catch (error) {
+        console.error('Error viewing PDF:', error);
+        downloadStatusMessage.innerHTML = `Error: ${error.message}`;
+        downloadStatusMessage.className = 'status error';
+      }
+    }
+    
+    // Helper function to explain cache status codes
+    function getStatusInfo(status) {
+      switch(status) {
+        case 'HIT':
+          return '(Content served from Cloudflare cache)';
+        case 'MISS':
+          return '(Content not in cache and fetched from origin)';
+        case 'BYPASS':
+          return '(Cache was bypassed)';
+        case 'EXPIRED':
+          return '(Content was in cache but expired)';
+        case 'DYNAMIC':
+          return '(Content not eligible for caching)';
+        case 'REVALIDATED':
+          return '(Content was revalidated with origin)';
+        default:
+          return '';
+      }
+    }
+    
+    // Copy URL to clipboard
+    function copyToClipboard(elementId) {
+      const element = document.getElementById(elementId);
+      const text = element.textContent;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        alert('URL copied to clipboard!');
+      }, () => {
+        alert('Failed to copy URL to clipboard.');
+      });
+    }
+    
     // Function to start the countdown
     function startCountdown(seconds) {
       // Clear any existing countdown
@@ -220,13 +389,18 @@
         clearInterval(countdownTimer);
         countdownElement.textContent = 'URL has expired!';
         downloadBtn.disabled = true;
+        viewPdfBtn.disabled = true;
         signedUrlParam = '';
       }
     }
     
+    // Global function for copy button
+    window.copyToClipboard = copyToClipboard;
+    
     // Event listeners
     getSignedUrlBtn.addEventListener('click', getSignedUrl);
     downloadBtn.addEventListener('click', downloadFile);
+    viewPdfBtn.addEventListener('click', viewPdf);
   </script>
 </body>
 </html>
