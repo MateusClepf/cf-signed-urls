@@ -44,7 +44,7 @@ export default {
     // In a real application you would want to make sure that
     // users could only generate signed URLs when authenticated
     if (url.pathname.startsWith("/signedurl/generate/")) {
-      url.pathname = url.pathname.replace("/signedurl/generate/", "/signedurl/files/");
+      url.pathname = url.pathname.replace("/signedurl/generate/", "/signedurl/s3/");
 
       const timestamp = Math.floor(Date.now() / 1000);
 
@@ -70,6 +70,6 @@ export default {
       // Verify all non /generate requests
     }
 
-    return fetch(new URL(url.pathname, "https://www.whereismypacket.net/signedURL"), request);
+    return fetch(new URL(url.pathname, "https://www.whereismypacket.net/signedurl"), request);
   },
 };

@@ -73,13 +73,13 @@ A demonstration web page that shows how to request, validate, and use signed URL
 - Embedded PDF viewer with signed URL authentication
 - Cache status display for debugging and verification
 - Copy functionality for sharing URLs
-- Files are stored in a R2 bucket with a bind to the Pages application as described in [Cloudflare documentation](https://developers.cloudflare.com/pages/tutorials/use-r2-as-static-asset-storage-for-pages/).
+- Files are stored in a private S3 bucket. Request is hadled by a cloudflare workers, the route to this workers is protected with a WAF rule enforcing HMAC validation. The worker is described here https://github.com/MateusClepf/private-s3-fetch
 
 ### Deployment Instructions
 
 1. Create a folder for your Pages project
 2. Add the files using the same structure seen here
-3. Create a R2 bucket and bind it to your Pages by editing the wrangler.toml file
+3. Create a S3 private bucket and the worker described [here](https://github.com/MateusClepf/private-s3-fetch)
 5. Deploy to Cloudflare Pages:
    - Log in to your Cloudflare dashboard
    - Navigate to Pages
@@ -102,7 +102,7 @@ For the signed URLs to be properly validated, you need to configure WAF custom r
 
 ```
 IF
-  (http.host eq "signedurl.whereismypacket.net" and starts_with(http.request.uri.path, "/signedurl/files/") and not is_timed_hmac_valid_v0("my-secret-key", http.request.uri, 300, http.request.timestamp.sec, 11))
+  (http.host eq "signedurl.whereismypacket.net" and starts_with(http.request.uri.path, "/signedurl/s3/") and not is_timed_hmac_valid_v0("my-secret-key", http.request.uri, 300, http.request.timestamp.sec, 11))
 THEN
   Block
 ```
@@ -115,11 +115,7 @@ Reference: [Cloudflare Cache Keys Documentation](https://developers.cloudflare.c
 
 ### Configuring Cache Rules
 
-1. Go to your Cloudflare dashboard
-2. Navigate to Caching > Configuration
-3. Scroll to "Cache Key Settings"
-4. Under "Query String", select "Ignore specified parameters"
-5. Add your authentication parameters (e.g., "accesskey") to the list of ignored parameters
+1. The worker fetching the content from S3 will handle caching, there you need to use the feature to remove query string to strip the "accesskey".
 
 This configuration ensures that files are cached based on their core URL, ignoring the authentication tokens which change for each user or session.
 
@@ -135,7 +131,7 @@ This configuration ensures that files are cached based on their core URL, ignori
 
 - Check WAF logs for blocked requests to diagnose authentication issues
 - Verify cache status information for caching-related problems
-- Ensure query string parameters are properly configured in cache keys
+- Ensure query string parameters are properly configured in REMOVE_QUERY_PARAMS variable in the private-s3-fetch worker.
 - Confirm that signing keys match between your worker and validation service
 
 ## Security Notes
