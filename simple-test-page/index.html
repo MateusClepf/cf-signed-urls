@@ -220,7 +220,7 @@
         }
         
         // Construct the full URL - now using just the query parameter portion
-        const fileUrl = `https://signedurl.whereismypacket.net/signedurl/files/mypdf.pdf${signedUrlParam}`;
+        const fileUrl = `https://signedurl.whereismypacket.net/signedurl/s3/mypdf.pdf${signedUrlParam}`;
         
         downloadStatusMessage.innerHTML = 'Downloading file...';
         downloadStatusMessage.className = 'status';
@@ -248,7 +248,7 @@
         }
         
         // Construct the full URL
-        const fileUrl = `https://signedurl.whereismypacket.net/signedurl/files/mypdf.pdf${signedUrlParam}`;
+        const fileUrl = `https://signedurl.whereismypacket.net/signedurl/s3/mypdf.pdf${signedUrlParam}`;
         
         downloadStatusMessage.innerHTML = 'Loading PDF...';
         downloadStatusMessage.className = 'status info';
