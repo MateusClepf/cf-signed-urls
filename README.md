@@ -13,7 +13,7 @@ This project consists of two main components:
 1. **Request Signing Worker** - A Cloudflare Worker that signs requests using HMAC authentication
 2. **Signed URL Demo Page** - A Cloudflare Pages application that demonstrates requesting and using signed URLs
 3. **WAF for HMAC validation**
-4. **Cache Rules for Query String Parameters**
+4. **Cloudflare Worker to fetch files from private S3 bucket**
 
 
 ## Request Signing Worker
